@@ -1,0 +1,11 @@
+node_modules/
+public/vendor/
+.DS_Store
+.env*
+*.log
+
+# Private working-folder evidence and local exports
+docs/
+*.zip
+__MACOSX/
+coverage/

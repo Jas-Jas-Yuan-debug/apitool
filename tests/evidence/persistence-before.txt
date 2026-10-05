@@ -1,0 +1,32 @@
+Captured excerpt from the earlier real test run before the production restore fixes.
+This is preserved transcript evidence, not a newly executed run or a fabricated rerun.
+
+Command: node --test tests/frontend.test.mjs
+Process exit code: 1
+Tool output chunk: dd498a
+
+✖ refresh preserves a provider error instead of describing it as a user stop
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  + 'interrupted'
+  - 'error'
+  at tests/frontend.test.mjs:128:10
+
+✖ one invalid saved chat does not erase other valid conversations
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  0 !== 1
+  at tests/frontend.test.mjs:135:10
+
+✖ one invalid saved message does not erase its valid conversation
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  0 !== 1
+  at tests/frontend.test.mjs:142:10
+
+ℹ tests 14
+ℹ pass 11
+ℹ fail 3
+
+The corresponding final tests are now named:
+- refresh preserves provider errors separately from stopped replies
+- malformed saved data preserves valid conversations and messages
+- one invalid saved message does not erase its valid conversation

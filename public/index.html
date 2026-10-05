@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Your local API playground. Connect an endpoint, choose a model, and start a conversation.">
+  <title>Relay — API playground</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <button class="sidebar-backdrop" id="sidebar-backdrop" aria-label="Close sidebar" hidden></button>
+    <aside class="sidebar" id="sidebar" aria-label="Connection and conversations">
+      <a class="brand" href="/" aria-label="Relay home"><img src="/favicon.svg" alt="" width="34" height="34"><span>relay<span class="brand-dot">.</span></span><span class="local-tag">LOCAL</span></a>
+      <button class="new-chat" id="new-chat"><span data-icon="plus"></span> New conversation <kbd>⌘ K</kbd></button>
+      <section class="connection-section" aria-labelledby="connection-heading">
+        <div class="section-label"><h2 id="connection-heading">YOUR CONNECTION</h2><span class="connection-state" id="connection-state"><span class="status-dot"></span><span id="connection-label">Not tested</span></span></div>
+        <label for="base-url">Base URL</label>
+        <div class="input-wrap"><input id="base-url" type="url" value="https://api.openai.com/v1" placeholder="https://api.example.com/v1" spellcheck="false" autocomplete="off"></div>
+        <label for="api-key">API key</label>
+        <div class="input-wrap key-wrap"><input id="api-key" type="password" placeholder="Paste your API key" spellcheck="false" autocomplete="off" aria-describedby="key-note"><button class="icon-button" id="toggle-key" aria-label="Show API key" type="button"><span data-icon="eye"></span></button></div>
+        <p class="field-note" id="key-note"><span data-icon="lock"></span> Key stays in this tab. Never saved.</p>
+        <button class="connect-button" id="load-models"><span data-icon="plug"></span><span id="load-models-label">Connect & load models</span><span data-icon="arrow-right"></span></button>
+        <p class="connection-feedback" id="connection-feedback" role="status" hidden></p>
+        <button type="button" id="use-custom-model" class="manual-model-button" hidden>Continue with a custom model ID <span data-icon="arrow-right"></span></button>
+      </section>
+      <section class="history-section" aria-labelledby="history-heading">
+        <div class="section-label"><h2 id="history-heading">CONVERSATIONS</h2><span class="history-count" id="history-count">0</span></div>
+        <div class="history-list" id="history-list"></div>
+      </section>
+      <div class="sidebar-footer"><div class="workspace-badge"><span class="workspace-icon" data-icon="layers"></span><div><strong>Personal workspace</strong><span>Conversations saved on this device</span></div></div><button class="settings-button" id="settings-button"><span data-icon="sliders"></span> Settings <span data-icon="chevron-right"></span></button></div>
+    </aside>
+    <main class="main-panel" id="main-panel">
+      <header class="topbar"><div class="topbar-left"><button class="icon-button mobile-menu" id="mobile-menu" aria-label="Open connection and conversations" aria-expanded="false"><span data-icon="menu"></span></button><span class="header-icon" data-icon="chat"></span><span>Playground</span><span class="breadcrumb-slash">/</span><strong id="chat-title">New conversation</strong></div><div class="topbar-actions"><span class="private-badge"><span data-icon="shield"></span> Local & private</span><button class="icon-button" id="export-chat" aria-label="Export conversation" title="Export conversation"><span data-icon="download"></span></button><button class="icon-button" id="backup-chat" aria-label="Download chat backup with files" title="Download chat backup with files"><span data-icon="layers"></span></button><button class="icon-button" id="theme-toggle" aria-label="Switch to dark theme" title="Switch theme"><span data-icon="moon"></span></button></div></header>
+      <div class="chat-scroll" id="chat-scroll">
+        <section class="welcome" id="welcome">
+          <div class="welcome-visual" aria-hidden="true"><span class="orbit orbit-one"></span><span class="orbit orbit-two"></span><span class="orbit-point"></span><div class="welcome-mark"><span data-icon="sparkles"></span></div></div>
+          <div class="eyebrow">YOUR MODELS. YOUR CONVERSATIONS.</div>
+          <h1>A direct line to<br>your next idea.</h1>
+          <p>Connect your API, choose a model, and make room<br class="desktop-break"> for a little curiosity.</p>
+          <div class="prompt-cards"><button class="prompt-card" data-prompt="Help me turn an idea into a practical project. Start by asking me what I want to build."><span class="prompt-icon peach" data-icon="code"></span><strong>Make something</strong><span>From a spark to a working plan</span><span class="card-arrow" data-icon="arrow-up-right"></span></button><button class="prompt-card" data-prompt="Help me think through a difficult decision. Ask me about the options and what matters most to me."><span class="prompt-icon lavender" data-icon="brain"></span><strong>Think it through</strong><span>A fresh perspective on a problem</span><span class="card-arrow" data-icon="arrow-up-right"></span></button><button class="prompt-card" data-prompt="Help me write something clearly and naturally. Ask me what I am writing and who it is for."><span class="prompt-icon sage" data-icon="pen"></span><strong>Find the words</strong><span>Say it a little more clearly</span><span class="card-arrow" data-icon="arrow-up-right"></span></button></div>
+        </section>
+        <div class="messages" id="messages" aria-label="Conversation"></div>
+      </div>
+      <div class="composer-area">
+        <div class="toast" id="toast" role="status" hidden></div>
+        <form class="composer" id="chat-form">
+          <div class="composer-controls">
+            <div class="model-control"><label for="model-select"><span data-icon="cube"></span> Model</label><select id="model-select" aria-describedby="model-help"><option value="">Choose a model</option><option value="custom:">Custom model ID…</option></select></div>
+            <div class="effort-control"><label for="effort"><span data-icon="brain"></span> Reasoning effort</label><select id="effort" title="Reasoning effort"><option value="auto">Auto — provider default</option><option value="none">None</option><option value="minimal">Minimal</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="xhigh">Extra high</option><option value="max">Max</option><option value="ultra">Ultra</option></select></div>
+          </div>
+          <div class="custom-model-wrap" id="custom-model-wrap" hidden><label for="model-input">Custom model ID</label><input id="model-input" placeholder="Enter the exact model ID" maxlength="256" autocomplete="off" spellcheck="false" aria-describedby="model-help"></div>
+          <p class="model-help" id="model-help" role="status">Load models from your connection, or choose Custom model ID.</p>
+          <div class="composer-tools"><button type="button" class="tool-button" id="attach-files"><span data-icon="paperclip"></span> Attach files</button><input type="file" id="file-input" multiple hidden accept="image/png,image/jpeg,image/webp,image/gif,.pdf,.txt,.md,.csv,.json,.js,.mjs,.ts,.tsx,.jsx,.py,.html,.css,.xml,.yaml,.yml,.log,.c,.cpp,.h,.hpp,.java,.go,.rs,.sh,.sql,.tex,.docx,.xlsx,.pptx"><button type="button" class="tool-button" id="web-search-toggle" aria-pressed="true" aria-describedby="ai-search-note" title="Let the AI choose when to search the web while answering"><span data-icon="globe"></span> AI web search <span id="web-search-setting" class="tool-setting">On</span></button><span class="file-status" id="file-status" role="status"></span></div>
+          <p class="ai-search-note" id="ai-search-note">The AI chooses queries and uses web or news results while replying.</p>
+          <div class="pending-context" id="pending-context" hidden aria-label="Attachments for your next message"></div>
+          <section class="web-search-panel" id="web-search-panel" hidden aria-label="Saved web references"><div class="search-input-row"><label class="sr-only" for="web-search-query">Saved search query</label><input id="web-search-query" maxlength="500" autocomplete="off" disabled><button type="button" class="search-submit" id="run-web-search" disabled>Search</button></div><p id="web-search-status" class="search-status" role="status"></p><div id="web-search-results" class="web-search-results"></div></section>
+          <label class="sr-only" for="message-input">Message</label><textarea id="message-input" placeholder="Message…" rows="1" maxlength="100000"></textarea>
+          <div class="composer-bottom"><span class="composer-hint" id="composer-hint"><span data-icon="corner-down-left"></span> Enter to send <span>·</span> Shift + Enter for a new line</span><button class="send-button" id="send-button" type="submit" aria-label="Send message" title="Send message"><span data-icon="arrow-up"></span></button></div>
+        </form>
+        <div class="composer-footnote"><span id="protocol-label">OpenAI-compatible API</span><span>Responses come from your selected provider.</span></div>
+      </div>
+      <div class="sr-only" id="live-announcement" aria-live="polite"></div>
+    </main>
+  </div>
+  <dialog id="settings-dialog" class="settings-dialog"><form id="settings-form"><div class="dialog-heading"><div><span class="eyebrow">MAKE IT YOURS</span><h2>Workspace settings</h2></div><button type="button" class="icon-button" id="close-settings" aria-label="Close settings"><span data-icon="x"></span></button></div><label for="protocol">API format</label><select id="protocol"><option value="auto">Auto detect</option><option value="responses">Responses API</option><option value="chat">Chat Completions</option></select><p class="field-note">Auto uses Responses for OpenAI and Chat Completions for other endpoints.</p><label for="system-prompt">System prompt <span class="optional">optional</span></label><textarea id="system-prompt" rows="5" maxlength="20000" placeholder="Give your model a role, tone, or a few instructions…"></textarea><p class="field-note">Applies to your next message, along with the conversation history.</p><div class="settings-info"><span data-icon="lock"></span><p>Chats and preferences are saved in this browser. Your API key is kept in memory and is cleared when you refresh or close the tab. Requests go through a server on your computer to the base URL you enter.</p></div><div class="license-info"><p>Copyright © 2026 Jas-Jas-Yuan-debug. AGPL-3.0-only. No warranty.</p><p><a href="https://github.com/Jas-Jas-Yuan-debug/apitool" target="_blank" rel="noopener noreferrer">Source code</a> · <a href="https://github.com/Jas-Jas-Yuan-debug/apitool/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">License and redistribution terms</a></p></div><div class="dialog-footer"><button class="secondary-button" type="button" id="clear-history">Clear chat history</button><button class="primary-button" type="submit">Save settings <span data-icon="check"></span></button></div></form></dialog>
+</body>
+</html>

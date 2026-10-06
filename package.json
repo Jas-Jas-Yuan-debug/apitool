@@ -1,6 +1,6 @@
 {
   "name": "relay-api-tool",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "private": true,
   "type": "module",
   "description": "A local playground for OpenAI-compatible APIs with streamed chat, files, AI web search, and response statistics.",

@@ -32,6 +32,8 @@ The server only listens on your computer's loopback interface.
 
 Enter sends; Shift+Enter adds a new line. Cmd/Ctrl+K opens a new conversation. You can stop generation, retry a failed reply, regenerate a completed reply, copy replies/code, export a conversation as Markdown, and switch themes.
 
+While a reply is running, Send is disabled and repeated submissions are ignored. Use the separate **Stop generating** button to cancel; a second Send click or Enter submission does not stop the reply.
+
 Replies appear as provider events arrive, with a small status showing waiting, thinking, searching, or streaming. Responses-compatible providers that send finalized content parts without text deltas are displayed as soon as those parts arrive. A provider that returns only one JSON response cannot deliver text before it finishes; Relay does not simulate token streaming.
 
 GPT image and DALL-E models use the Images API automatically. A text prompt goes to `images/generations`; attaching PNG, JPEG, or WebP images uses `images/edits` for supported models. GPT image models request native streaming with two partial previews; providers may instead return one completed JSON image. Generated pictures render in the same chat, offer a download, and are saved in browser storage and chat backups. Remote image URLs appear as links. Image requests use the latest prompt and its text/image attachments; reasoning effort and web search apply to chat models. Each returned picture is limited to 8 MiB. Images API support and preview availability depend on the selected provider.

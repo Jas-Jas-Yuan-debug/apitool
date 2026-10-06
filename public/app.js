@@ -495,12 +495,14 @@ function renderStreamingMessage(chat, message) {
 }
 function updateSendButton() {
   const button = $('send-button');
-  button.classList.toggle('generating', Boolean(activeGeneration));
-  button.innerHTML = icon(activeGeneration ? 'stop' : 'arrow-up');
-  button.setAttribute('aria-label', activeGeneration ? 'Stop generating' : 'Send message');
-  button.title = activeGeneration ? 'Stop generating' : 'Send message';
+  $('chat-form').classList.toggle('generating', Boolean(activeGeneration));
+  button.innerHTML = icon('arrow-up');
+  button.setAttribute('aria-label', 'Send message');
+  button.title = 'Send message';
+  $('stop-button').hidden = !activeGeneration;
+  $('stop-button').disabled = !activeGeneration;
   const draft = composer();
-  button.disabled = !activeGeneration && ((!$('message-input').value.trim() && !draft.attachments.length && !draft.search) || fileReads.has(currentChat.id) || searchRequests.has(currentChat.id));
+  button.disabled = Boolean(activeGeneration) || ((!$('message-input').value.trim() && !draft.attachments.length && !draft.search) || fileReads.has(currentChat.id) || searchRequests.has(currentChat.id));
 }
 function resizeComposer() {
   const input = $('message-input'); input.style.height = 'auto'; input.style.height = `${Math.min(144, Math.max(40, input.scrollHeight))}px`;
@@ -561,7 +563,7 @@ async function loadModels() {
 }
 function stopGeneration() { if (activeGeneration) activeGeneration.controller.abort(); }
 async function sendMessage(regenerate = false) {
-  if (activeGeneration) { if (!regenerate) stopGeneration(); return; }
+  if (activeGeneration) return;
   const draft = composer();
   const prompt = $('message-input').value.trim() || (draft.attachments.length ? 'Please analyze the attached files.' : draft.search ? `Answer using the web results for: ${draft.search.query}` : '');
   if (!regenerate && !prompt) return;
@@ -611,7 +613,7 @@ async function sendMessage(regenerate = false) {
   const operation = { controller: new AbortController(), chat, reply, startedAt: performance.now() };
   activeGeneration = operation;
   const request = { baseUrl: config.baseUrl, apiKey: $('api-key').value.trim(), model: config.model, effort: config.effort, protocol: config.protocol, systemPrompt: config.systemPrompt, webSearch: config.webSearch, messages: requestMessages };
-  renderComposerContext(); renderChat(); renderHistory(); persist(); sidebarOpen(false); announce('Generating a reply.');
+  renderComposerContext(); renderChat(); renderHistory(); persist(); sidebarOpen(false); announce('Generating a reply.'); $('message-input').focus();
   try {
     const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request), signal: operation.controller.signal });
     await consumeEvents(response, event => {
@@ -712,6 +714,7 @@ $('message-input').addEventListener('keydown', event => {
   }
 });
 $('chat-form').addEventListener('submit', event => { event.preventDefault(); sendMessage(); });
+$('stop-button').addEventListener('click', stopGeneration);
 document.querySelectorAll('[data-prompt]').forEach(button => button.addEventListener('click', () => { $('message-input').value = button.dataset.prompt; rememberDraft(); resizeComposer(); $('message-input').focus(); }));
 $('settings-button').addEventListener('click', () => {
   $('protocol').value = config.protocol; $('system-prompt').value = config.systemPrompt;
